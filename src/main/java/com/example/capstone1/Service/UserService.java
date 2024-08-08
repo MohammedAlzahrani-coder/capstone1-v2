@@ -67,37 +67,28 @@ public class UserService {
 
 
     public int purchase(int userId, int merchantId, int productId) {
-        User user = null;
-        for (User u : users) {
-            if (u.getId() == userId) {
-                user = u;
-                break;
-            }
-        }
+        User user = users.stream()
+                .filter(u -> u.getId() == userId)
+                .findFirst()
+                .orElse(null);
         if (user == null) {
             return -1; // User not found
         }
 
-        Merchant merchant = null;
-        for (Merchant m : merchantService.getMerchants()) {
-            if (m.getId() == merchantId) {
-                merchant = m;
-                break;
-            }
-        }
+        Merchant merchant = merchantService.getMerchants().stream()
+                .filter(m -> m.getId() == merchantId)
+                .findFirst()
+                .orElse(null);
         if (merchant == null) {
             return -2; // Merchant not found
         }
 
-        Product product = null;
-        for (Product p : productService.getProducts()) {
-            if (p.getId() == productId) {
-                product = p;
-                break;
-            }
-        }
+        Product product = productService.getProducts().stream()
+                .filter(p -> p.getId() == productId)
+                .findFirst()
+                .orElse(null);
         if (product == null) {
-            return -3; // Product not found
+            return -3; 
         }
 
         System.out.println("Checking stock for merchantId: " + merchantId + ", productId: " + productId);
@@ -105,20 +96,22 @@ public class UserService {
         System.out.println("Stock available: " + inStock);
 
         if (!inStock) {
-            return -4; // Product not in stock
+            return -4; 
         }
 
         if (user.getBalance() < product.getPrice()) {
-            return -5; // Insufficient balance
+            return -5; 
         }
 
         boolean stockReduced = merchantStockService.reduceStock(merchantId, productId, 1);
         if (!stockReduced) {
-            return -6; // Stock reduction failed
+            return -6; 
         }
 
-        user.setBalance(user.getBalance() - product.getPrice()); // Deduct price from user balance
-        return 0; // Purchase successful
+        user.setBalance(user.getBalance() - product.getPrice()); 
+        product.setSale(product.getSale() + 1); 
+        product.setStocks(product.getStocks() - 1); 
+        return 0; 
     }
 
     }
