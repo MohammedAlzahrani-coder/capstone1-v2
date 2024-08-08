@@ -61,33 +61,17 @@ public class ProductService {
 
 
     public List<Product> getTopSellingProducts() {
-        List<Product> topSellingProducts = new ArrayList<>();
-        for (Product product : products) {
-            if (product.getSale() > 0) { // Only consider products that have been purchased
-                if (topSellingProducts.size() < 10) {
-                    topSellingProducts.add(product);
-                } else {
-                    for (int i = 0; i < topSellingProducts.size(); i++) {
-                        if (product.getSale() > topSellingProducts.get(i).getSale()) {
-                            topSellingProducts.set(i, product);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return topSellingProducts;
+        return products.stream()
+                .filter(product -> product.getSale() > 0)
+                .sorted(Comparator.comparingInt(Product::getSale).reversed())
+                .limit(10)
+                .collect(Collectors.toList());
     }
 
-
     public List<Product> getLowStockProducts() {
-        List<Product> lowStockProducts = new ArrayList<>();
-        for (Product product : products) {
-            if (product.getStocks() < 5) {
-                lowStockProducts.add(product);
-            }
-        }
-        return lowStockProducts;
+        return products.stream()
+                .filter(product -> product.getStocks() < 5)
+                .collect(Collectors.toList());
     }
 
 
